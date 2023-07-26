@@ -1,0 +1,192 @@
+
+/*
+Sujal Jain  2112090
+22/07/2023 11:22
+*/
+#include <sddl.h>
+#include <bits/stdc++.h>
+#include <conio.h>
+#include <windows.h>
+using namespace std;
+int width, height;
+int headX, headY, fruitX, fruitY, score;
+bool gameOver;
+int tailX[100], tailY[100];
+int tailLength;
+void gotoXY(int x, int y)
+{
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+enum directions
+{
+    stop = 0,
+    leftss,
+    rightss,
+    up,
+    down
+};
+directions d;
+void setup()
+{
+    gameOver = false;
+    d = stop;
+    headX = width / 2;
+    headY = height / 2;
+    // Seed the random number generator with the current time
+    std::srand(static_cast<unsigned int>(std::time(0)));
+
+    // Generate a random number between 1 and 100
+    int rn1 = std::rand() % (width - 1);
+    int rn2 = std::rand() % (height - 1);
+
+    fruitX = rn1;
+
+    fruitY = rn2;
+}
+void draw()
+{
+    gotoXY(0, 0);
+    // system("cls"); // clears the console window;
+    // drawing the map
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            if (i == 0 || j == 0 || i == width - 1 || j == height - 1)
+            {
+                cout << "#";
+            }
+            else if (i == headX && j == headY)
+            {
+                cout << "W";
+            }
+            else if (i == fruitX && j == fruitY)
+            {
+                cout << "o";
+            }
+            else
+            {
+                bool print = false;
+                for (int z = 0; z < tailLength; z++)
+
+                {
+                    if (tailX[z] == i && tailY[z] == j)
+                    {
+                        cout << "w";
+                        print = true;
+                    }
+                }
+                if (!print)
+                    cout << " ";
+            }
+        }
+        cout << endl;
+    }
+    cout << "Current score : " << score << endl;
+}
+void logic()
+{
+    int prevX = tailX[0];
+    int prevY = tailY[0];
+    int prev2X, prev2Y;
+    tailX[0] = headX;
+    tailY[0] = headY;
+    for (int i = 1; i < tailLength; i++)
+    {
+        prev2X = tailX[i];
+        prev2Y = tailY[i];
+        tailX[i] = prevX;
+        tailY[i] = prevY;
+        prevX = prev2X;
+        prevY = prev2Y;
+    }
+
+    switch (d)
+    {
+    case stop:
+        break;
+    case leftss:
+        headX--;
+        break;
+    case rightss:
+        headX++;
+        break;
+    case up:
+        headY--;
+        break;
+    case down:
+        headY++;
+        break;
+
+    default:
+        break;
+    }
+    if (headX > width || headX < 0 || headY > height || headY < 0)
+        gameOver = true;
+    for (int i = 0; i < tailLength; i++)
+    {
+        if (tailX[i] == headX && tailY[i] == headY)
+            gameOver = true;
+    }
+
+    if (headX == fruitX && headY == fruitY)
+    {
+        tailLength++;
+        score++;
+        // Seed the random number generator with the current time
+        std::srand(static_cast<unsigned int>(std::time(0)));
+
+        // Generate a random number between 1 and 100
+        int rn1 = std::rand() % (width - 1);
+        int rn2 = std::rand() % (height - 1);
+
+        fruitX = rn1;
+
+        fruitY = rn2;
+    }
+}
+void input()
+{
+    if (_kbhit()) // output 1 when anykeyboard button is hit;
+    {
+        switch (_getch())
+        {
+        case 'w':
+            d = leftss;
+            break;
+        case 'a':
+            d = up;
+            break;
+        case 'd':
+            d = down;
+            break;
+        case 's':
+            d = rightss;
+            break;
+        case 'e':
+            gameOver = true;
+            break;
+
+        default:
+            break;
+        }
+    }
+}
+
+int main()
+{
+    int ct = 0;
+    height = 30;
+    width = 20;
+    setup();
+    while (!gameOver)
+    {
+        draw();
+        input();
+        logic();
+        Sleep(10);
+    }
+}
